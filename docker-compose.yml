@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: ai-loan-decisioning
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:admin@db:5432/loan_ai
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - loan-network
+
+  db:
+    image: postgres:15
+    container_name: loan-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: loan_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d loan_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loan-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  loan-network:
+    driver: bridge
+
