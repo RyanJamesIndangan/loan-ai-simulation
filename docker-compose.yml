@@ -15,6 +15,20 @@ services:
     networks:
       - loan-network
 
+  web:
+    build: ./web
+    container_name: ai-loan-web
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE=http://localhost:8000
+    depends_on:
+      - app
+      - db
+    restart: unless-stopped
+    networks:
+      - loan-network
+
   db:
     image: postgres:15
     container_name: loan-postgres
